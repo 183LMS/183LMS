@@ -13,6 +13,7 @@
 my $pidf = "/var/run/lms_ping.pid";
 my $pinged_ip = "192.168.2.6";
 my $f;
+my $sqlf = "/var/run/lms_ping.sql";
 
 if (-f $pidf) {
 	open $f, "< $pidf"
@@ -62,5 +63,16 @@ if ($pkt_jitter == -1) {
 } else {
 	print "Packet Jitter: $pkt_jitter \n";
 }
+
+my $sqf;
+open $sqf, "> $sqlf"
+	or die "could not open sql file";
+
+print $sqf "INSERT INTO testpings(ping) VALUES (\"$pkt_avg_ping\");";
+
+`mysql -prootpass cs183 < $sqlf`;
+
+unlink $sqlf;
+
 
 unlink $pidf;
