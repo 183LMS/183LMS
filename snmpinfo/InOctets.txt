@@ -1,0 +1,6 @@
+IF-MIB::ifInOctets.1 = Counter32: 360
+IF-MIB::ifInOctets.2 = Counter32: 3003682099
+IF-MIB::ifInOctets.3 = Counter32: 0
+IF-MIB::ifInOctets.4 = Counter32: 143499609
+IF-MIB::ifInOctets.5 = Counter32: 0
+IF-MIB::ifInOctets.6 = Counter32: 1463394637

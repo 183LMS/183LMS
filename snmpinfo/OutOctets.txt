@@ -1,0 +1,6 @@
+F-MIB::ifOutOctets.1 = Counter32: 360
+IF-MIB::ifOutOctets.2 = Counter32: 1384058655
+IF-MIB::ifOutOctets.3 = Counter32: 0
+IF-MIB::ifOutOctets.4 = Counter32: 161697975
+IF-MIB::ifOutOctets.5 = Counter32: 0
+IF-MIB::ifOutOctets.6 = Counter32: 3106293210

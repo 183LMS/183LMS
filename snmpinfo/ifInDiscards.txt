@@ -1,0 +1,6 @@
+IF-MIB::ifInDiscards.1 = Counter32: 0
+IF-MIB::ifInDiscards.2 = Counter32: 0
+IF-MIB::ifInDiscards.3 = Counter32: 0
+IF-MIB::ifInDiscards.4 = Counter32: 0
+IF-MIB::ifInDiscards.5 = Counter32: 0
+IF-MIB::ifInDiscards.6 = Counter32: 0
