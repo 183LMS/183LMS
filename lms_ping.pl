@@ -46,29 +46,27 @@ foreach my $line(@ping_output) {
 	}
 }
 
-if ($pkts_loss_pct == -1) {
-	print "No lost packet count found. Likely not pingable.\n";
-} else {
-	print "$pkts_loss_pct packets lost \n";
-}
-
-if ($pkt_avg_ping == -1) {
-	print "No average count found. Likely not pingable.\n";
-} else {
-	print "Average ping: $pkt_avg_ping\n";
-}
-
-if ($pkt_jitter == -1) {
-	print "No packet jitter found.  Likely not pingable.\n";
-} else {
-	print "Packet Jitter: $pkt_jitter \n";
-}
-
 my $sqf;
 open $sqf, "> $sqlf"
 	or die "could not open sql file";
 
-print $sqf "INSERT INTO testpings(ping) VALUES (\"$pkt_avg_ping\");";
+print $sqf "INSERT INTO mytable(ping, loss, jitter) VALUES (";
+
+if ($pkt_avg_ping == -1) {
+	print $sqf "NULL,";
+} else {
+	print $sqf "\"$pkt_avg_ping\",";
+}
+
+printf $sqf "\"$pkts_loss_pct\",";
+
+if ($pkt_jitter == -1) {
+	print $sqf "NULL,";
+} else {
+	print $sqf "\"$pkt_jitter\"";
+}
+
+print $sqf ");";
 
 `mysql -prootpass cs183 < $sqlf`;
 
