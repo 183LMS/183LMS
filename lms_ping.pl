@@ -12,11 +12,22 @@
 
 my $pidf = "/var/run/lms_ping.pid";
 my $pinged_ip = "192.168.2.6";
+my $f;
 
-open my $f, "> $pidf"
+if (-f $pidf) {
+	open $f, "< $pidf"
+		or die "could not open pid file.";
+	my $pid_test = <$f>;
+	if (kill 0, "$pid_test") {
+		die "another lms_ping is running.";
+	}
+}
+
+open $f, "> $pidf"
 	or die "could not open pid file.";
 print $f $$;
 close $f;
+
 
 my @ping_output = `ping -c 10 $pinged_ip`;
 
@@ -30,7 +41,7 @@ foreach my $line(@ping_output) {
 	}
 	if ($line =~ m/^rtt min\/avg\/max\/mdev = [\d|.]+\/([\d|.]+)\/[\d|.]+\/([\d|.]+) ms$/) {
 		$pkt_avg_ping = $1;
-		$pkt_jittier = $2;
+		$pkt_jitter = $2;
 	}
 }
 
@@ -49,7 +60,7 @@ if ($pkt_avg_ping == -1) {
 if ($pkt_jitter == -1) {
 	print "No packet jitter found.  Likely not pingable.\n";
 } else {
-	print "$pkt_jitter \n";
+	print "Packet Jitter: $pkt_jitter \n";
 }
 
 unlink $pidf;
