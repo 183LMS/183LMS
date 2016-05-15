@@ -1,8 +1,10 @@
 #!/usr/bin/perl
 
 ###############################################################################
+#
 # This is a script for pinging multiple times and averaging and 
 # entering it into the database.
+#
 ###############################################################################
 
 # The default ping format reports

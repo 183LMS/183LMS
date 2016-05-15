@@ -46,15 +46,13 @@ my $sqf;
 open $sqf, "> $sqlf"
 	or die "could not open sql file";
 
-print $sqf "INSERT INTO mytable(ping, loss, jitter) VALUES (";
+print $sqf "INSERT INTO atable(inB, outB) VALUES (";
 
 if ($pkt_avg_ping == -1) {
 	print $sqf "NULL,";
 } else {
 	print $sqf "\"$pkt_avg_ping\",";
 }
-
-printf $sqf "\"$pkts_loss_pct\",";
 
 if ($pkt_jitter == -1) {
 	print $sqf "NULL,";

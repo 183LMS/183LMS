@@ -1,3 +1,4 @@
+#ping
 PING 192.168.2.10 (192.168.2.10) 56(84) bytes of data.
 64 bytes from 192.168.2.10: icmp_seq=1 ttl=64 time=0.208 ms
 64 bytes from 192.168.2.10: icmp_seq=2 ttl=64 time=0.172 ms
