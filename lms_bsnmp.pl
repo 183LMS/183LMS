@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 
-my $pidf = "/var/run/lms_asnmp.pid";
-my $snmped_ip = "192.168.2.5";
+my $pidf = "/var/run/lms_bsnmp.pid";
+my $snmped_ip = "192.168.2.6";
 my $f;
-my $sqlf = "/var/run/lms_asnmp.sql";
+my $sqlf = "/var/run/lms_bsnmp.sql";
 my $sqf;
 my $inoctets = -1;
 my $outoctets = -1;
@@ -22,7 +22,6 @@ open $f, "> $pidf"
 	or die "could not open pid file.";
 print $f $$;
 close $f;
-
 
 my @snmp_output = `snmpwalk -v2c -cpublic $snmped_ip IF-MIB::ifOutOctets.$Iface`;
 
@@ -46,7 +45,7 @@ my $sqf;
 open $sqf, "> $sqlf"
 	or die "could not open sql file";
 
-print $sqf "INSERT INTO atable(inB, outB) VALUES (";
+print $sqf "INSERT INTO btable(inB, outB) VALUES (";
 
 if ($inoctets == -1) {
 	print $sqf "NULL,";
