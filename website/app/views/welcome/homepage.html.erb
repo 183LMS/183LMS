@@ -1,3 +1,4 @@
+<% provide(:title, "CS183 - Link Monitoring System") %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,16 +10,16 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Freelancer - Start Bootstrap Theme</title>
+    <title><%= yield(:title) %></title>
 
     <!-- Bootstrap Core CSS - Uses Bootswatch Flatly Theme: http://bootswatch.com/flatly/ -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link href="css/freelancer.css" rel="stylesheet">
+    <link href="assets/freelancer.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
-    <link href="font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="assets/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link href="http://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
     <link href="http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
 
@@ -77,7 +78,7 @@
                     <div class="intro-text">
                         <span class="name">Link Monitoring System</span>
                         <hr class="star-light">
-                        <span class="skills">Brandon Lu - Kenneth Chan - Jay Song - Kevin Yang - Yohanan Arciniega - Christine Hawley</span>
+                        <span class="skills">Brandon Lu - Christine Hawley - Jay Song - Kenneth Chan - Kevin Yang - Yohanan Arciniega</span>
                     </div>
                 </div>
             </div>
@@ -512,22 +513,22 @@
     </div>
 
     <!-- jQuery -->
-    <script src="js/jquery.js"></script>
+    <script src="assets/jquery.js"></script>
 
     <!-- Bootstrap Core JavaScript -->
-    <script src="js/bootstrap.min.js"></script>
+    <script src="assets/bootstrap.min.js"></script>
 
     <!-- Plugin JavaScript -->
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
-    <script src="js/classie.js"></script>
-    <script src="js/cbpAnimatedHeader.js"></script>
+    <script src="assets/classie.js"></script>
+    <script src="assets/cbpAnimatedHeader.js"></script>
 
     <!-- Contact Form JavaScript -->
-    <script src="js/jqBootstrapValidation.js"></script>
-    <script src="js/contact_me.js"></script>
+    <script src="assets/jqBootstrapValidation.js"></script>
+    <script src="assets/contact_me.js"></script>
 
     <!-- Custom Theme JavaScript -->
-    <script src="js/freelancer.js"></script>
+    <script src="assets/freelancer.js"></script>
 
 </body>
 
