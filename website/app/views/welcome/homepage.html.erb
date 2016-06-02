@@ -1,4 +1,67 @@
-<% provide(:title, "CS183 - Link Monitoring System") %>
+<%
+provide(:title, "CS183 - Link Monitoring System")
+
+require 'rubygems'
+require 'mysql2'
+
+client = Mysql2::Client.new(
+    :host => "localhost",
+    :port => "3306",
+    :username => "root",
+    :database => "cs183",
+    :password => "rootpass")
+sql_ping =
+"SELECT UNIX_TIMESTAMP(time)*1000, ping, loss, jitter
+    FROM mytable
+    WHERE (MOD(HOUR(time), 4) = 0 and MINUTE(time) = 0)
+        OR (((time > NOW() - INTERVAL 14 DAY))
+            AND (MOD(HOUR(time), 6) = 0))
+	OR (((time > NOW() - INTERVAL 7 DAY))
+	    AND (MOD(HOUR(time), 2) = 0))
+        OR (((time > NOW() - INTERVAL 3 DAY))
+            AND (MOD(MINUTE(time), 30) = 0))
+        OR (((time > NOW() - INTERVAL 2 DAY))
+	    AND (MOD(MINUTE(time), 15) = 0))
+        OR ((time > NOW() - INTERVAL 1 DAY)
+            AND ((time > NOW() - INTERVAL 6 HOUR)
+                OR (MOD(MINUTE(time), 5) = 0)))
+    ORDER BY time desc"
+result_ping = client.query(sql_ping, :as => :array)
+sql_tpa =
+"SELECT UNIX_TIMESTAMP(time)*1000, inB_cumulative, outB_cumulative
+    FROM atable
+    WHERE (MOD(HOUR(time), 4) = 0 and MINUTE(time) = 0)
+        OR (((time > NOW() - INTERVAL 14 DAY))
+            AND (MOD(HOUR(time), 6) = 0))
+	OR (((time > NOW() - INTERVAL 7 DAY))
+	    AND (MOD(HOUR(time), 2) = 0))
+        OR (((time > NOW() - INTERVAL 3 DAY))
+            AND (MOD(MINUTE(time), 30) = 0))
+        OR (((time > NOW() - INTERVAL 2 DAY))
+	    AND (MOD(MINUTE(time), 15) = 0))
+        OR ((time > NOW() - INTERVAL 1 DAY)
+            AND ((time > NOW() - INTERVAL 6 HOUR)
+                OR (MOD(MINUTE(time), 5) = 0)))
+    ORDER BY time desc"
+result_tpa = client.query(sql_tpa, :as => :array)
+sql_tpb =
+"SELECT UNIX_TIMESTAMP(time)*1000, inB_cumulative, outB_cumulative
+    FROM btable
+    WHERE (MOD(HOUR(time), 4) = 0 and MINUTE(time) = 0)
+        OR (((time > NOW() - INTERVAL 14 DAY))
+            AND (MOD(HOUR(time), 6) = 0))
+	OR (((time > NOW() - INTERVAL 7 DAY))
+	    AND (MOD(HOUR(time), 2) = 0))
+        OR (((time > NOW() - INTERVAL 3 DAY))
+            AND (MOD(MINUTE(time), 30) = 0))
+        OR (((time > NOW() - INTERVAL 2 DAY))
+	    AND (MOD(MINUTE(time), 15) = 0))
+        OR ((time > NOW() - INTERVAL 1 DAY)
+            AND ((time > NOW() - INTERVAL 6 HOUR)
+                OR (MOD(MINUTE(time), 5) = 0)))
+    ORDER BY time desc"
+result_tpb = client.query(sql_tpa, :as => :array)
+%>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -19,7 +82,7 @@
     <link href="assets/freelancer.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
-    <link href="assets/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="assets/font-awesome.css" rel="stylesheet" type="text/css">
     <link href="http://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
     <link href="http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
 
@@ -29,7 +92,109 @@
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type='text/javascript'>
+      google.charts.load('current', {'packages':['annotationchart']});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('date', 'Date');
+        data.addColumn('number', 'Kepler-22b mission');
+        data.addColumn('number', 'Gliese 163 mission');
+        data.addRows([
+          [new Date(2314, 2, 15), 12400, 10645],
+          [new Date(2314, 2, 16), 24045, 12374],
+          [new Date(2314, 2, 17), 35022, 15766],
+          [new Date(2314, 2, 18), 12284, 34334],
+          [new Date(2314, 2, 19), 8476, 66467],
+          [new Date(2314, 2, 20), 0, 79463]
+        ]);
 
+        var chart = new google.visualization.AnnotationChart(document.getElementById('chart_div_bw'));
+
+        var options = {
+          height: 450,
+          width: 680,
+          displayAnnotations: false
+        };
+
+        chart.draw(data, options);
+      }
+    </script>
+    <script type='text/javascript'>
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('date', 'Date');
+        data.addColumn('number', 'Average Ping');
+        data.addColumn('number', 'Lost Pings');
+        data.addColumn('number', 'Average Jitter');
+        data.addRows(
+        <%= "[" %><% result_ping.to_a.each do |row| %>
+            <%= "[" + "new Date\(" + row[0].to_s + "\), " + row[1..3].join(", ") + "]," %>
+        <% end %><%= "]" %>
+        );
+
+        var chart = new google.visualization.AnnotationChart(document.getElementById('chart_div_ping'));
+
+        var options = {
+          height: 450,
+          width: 680,
+          displayAnnotations: false
+        };
+
+        chart.draw(data, options);
+      }
+    </script>
+    <script type='text/javascript'>
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('date', 'Date');
+        data.addColumn('number', 'In Bytes');
+        data.addColumn('number', 'Out Bytes');
+        data.addRows(
+        <%= "[" %><% result_tpa.to_a.each do |row| %>
+            <%= "[" + "new Date\(" + row[0].to_s + "\), " + row[1..2].join(", ") + "]," %>
+        <% end %><%= "]" %>
+        );
+
+        var chart = new google.visualization.AnnotationChart(document.getElementById('chart_div_tpa'));
+
+        var options = {
+          height: 450,
+          width: 680,
+          displayAnnotations: false
+        };
+
+        chart.draw(data, options);
+      }
+    </script>
+    <script type='text/javascript'>
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('date', 'Date');
+        data.addColumn('number', 'In Bytes');
+        data.addColumn('number', 'Out Bytes');
+        data.addRows(
+        <%= "[" %><% result_tpa.to_a.each do |row| %>
+            <%= "[" + "new Date\(" + row[0].to_s + "\), " + row[1..2].join(", ") + "]," %>
+        <% end %><%= "]" %>
+        );
+
+        var chart = new google.visualization.AnnotationChart(document.getElementById('chart_div_tpb'));
+
+        var options = {
+          height: 450,
+          width: 680,
+          displayAnnotations: false
+        };
+
+        chart.draw(data, options);
+      }
+    </script>
 </head>
 
 <body id="page-top" class="index">
@@ -58,7 +223,7 @@
                         <a href="#about">About</a>
                     </li>
                     <li class="page-scroll">
-                        <a href="#portfolio">Data Entry 1</a>
+                        <a href="#portfolio">Data Entries</a>
                     </li>
                     <li class="page-scroll">
                         <a href="#contact">Contact</a>
@@ -110,7 +275,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
-                    <h2>Data Entry Here</h2>
+                    <h2>Your Link Monitor Statistics</h2>
                     <hr class="star-primary">
                 </div>
             </div>
@@ -122,7 +287,7 @@
                                 <i class="fa fa-search-plus fa-3x"></i>
                             </div>
                         </div>
-                        <img src="assets/portfolio/cabin.png" class="img-responsive" alt="">
+                        <img src="assets/portfolio/bandwidth.png" class="img-responsive" alt="">
                     </a>
                 </div>
                 <div class="col-sm-4 portfolio-item">
@@ -132,7 +297,7 @@
                                 <i class="fa fa-search-plus fa-3x"></i>
                             </div>
                         </div>
-                        <img src="assets/portfolio/cake.png" class="img-responsive" alt="">
+                        <img src="assets/portfolio/PING.png" class="img-responsive" alt="">
                     </a>
                 </div>
                 <div class="col-sm-4 portfolio-item">
@@ -142,7 +307,7 @@
                                 <i class="fa fa-search-plus fa-3x"></i>
                             </div>
                         </div>
-                        <img src="assets/portfolio/circus.png" class="img-responsive" alt="">
+                        <img src="assets/portfolio/latency.png" class="img-responsive" alt="">
                     </a>
                 </div>
                 <div class="col-sm-4 portfolio-item">
@@ -152,7 +317,7 @@
                                 <i class="fa fa-search-plus fa-3x"></i>
                             </div>
                         </div>
-                        <img src="assets/portfolio/game.png" class="img-responsive" alt="">
+                        <img src="assets/portfolio/total.png" class="img-responsive" alt="">
                     </a>
                 </div>
                 <div class="col-sm-4 portfolio-item">
@@ -162,7 +327,7 @@
                                 <i class="fa fa-search-plus fa-3x"></i>
                             </div>
                         </div>
-                        <img src="assets/portfolio/safe.png" class="img-responsive" alt="">
+                        <img src="assets/portfolio/git.png" class="img-responsive" alt="">
                     </a>
                 </div>
                 <div class="col-sm-4 portfolio-item">
@@ -172,7 +337,7 @@
                                 <i class="fa fa-search-plus fa-3x"></i>
                             </div>
                         </div>
-                        <img src="assets/portfolio/submarine.png" class="img-responsive" alt="">
+                        <img src="assets/portfolio/throughput.png" class="img-responsive" alt="">
                     </a>
                 </div>
             </div>
@@ -184,7 +349,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
-                    <h2>Contact Me</h2>
+                    <h2>Technical Support</h2>
                     <hr class="star-primary">
                 </div>
             </div>
@@ -241,7 +406,7 @@
                 <div class="row">
                     <div class="footer-col col-md-4">
                         <h3>Location</h3>
-                        <p>3481 Melrose Place<br>Beverly Hills, CA 90210</p>
+                        <p>Lunokhod 1 & 2<br>On the Moon.</p>
                     </div>
                     <div class="footer-col col-md-4">
                         <h3>Around the Web</h3>
@@ -301,24 +466,12 @@
                 <div class="row">
                     <div class="col-lg-8 col-lg-offset-2">
                         <div class="modal-body">
-                            <h2>Project Title</h2>
-                            <hr class="star-primary">
-                            <img src="assets/portfolio/cabin.png" class="img-responsive img-centered" alt="">
-                            <p>Use this area of the page to describe your project. The icon above is part of a free icon set by <a href="https://sellfy.com/p/8Q9P/jV3VZ/">Flat Icons</a>. On their website, you can download their free set with 16 icons, or you can purchase the entire set with 146 icons for only $12!</p>
-                            <ul class="list-inline item-details">
-                                <li>Client:
-                                    <strong><a href="http://startbootstrap.com">Start Bootstrap</a>
-                                    </strong>
-                                </li>
-                                <li>Date:
-                                    <strong><a href="http://startbootstrap.com">April 2014</a>
-                                    </strong>
-                                </li>
-                                <li>Service:
-                                    <strong><a href="http://startbootstrap.com">Web Development</a>
-                                    </strong>
-                                </li>
-                            </ul>
+                            <!-- Bandwidth -->
+                            <h2>Bandwidth</h2>
+                            <hr class="star-primary"
+                            <div id="chart_div_bw" style="width: auto; height: 500px;"></div>
+                            <p>This is the maximum amount of data that can be transferred from a network at a time. This is a cap on how fast your internet can go and it is often seen in Mbps (Megabytes per second). Your internet service provider (ISP) may give you an estimate on the speeds you Internet may reach up to. Higher bandwidth is usually more expensive.</p>
+<p>Often you won't be seeing speeds totaling your bandwidth cap. If there is a dramatic difference in throughput and bandwidth, your ISP may be limiting bandwidth more than advertised and should be notified.</p>
                             <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
                         </div>
                     </div>
@@ -338,25 +491,13 @@
                 <div class="row">
                     <div class="col-lg-8 col-lg-offset-2">
                         <div class="modal-body">
-                            <h2>Project Title</h2>
+                            <h2>Ping</h2>
                             <hr class="star-primary">
-                            <img src="assets/portfolio/cake.png" class="img-responsive img-centered" alt="">
-                            <p>Use this area of the page to describe your project. The icon above is part of a free icon set by <a href="https://sellfy.com/p/8Q9P/jV3VZ/">Flat Icons</a>. On their website, you can download their free set with 16 icons, or you can purchase the entire set with 146 icons for only $12!</p>
-                            <ul class="list-inline item-details">
-                                <li>Client:
-                                    <strong><a href="http://startbootstrap.com">Start Bootstrap</a>
-                                    </strong>
-                                </li>
-                                <li>Date:
-                                    <strong><a href="http://startbootstrap.com">April 2014</a>
-                                    </strong>
-                                </li>
-                                <li>Service:
-                                    <strong><a href="http://startbootstrap.com">Web Development</a>
-                                    </strong>
-                                </li>
-                            </ul>
-                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+                            <div id="chart_div_ping" style="width: auto; height: 500px;"></div>
+                            <p>The ping gives us information about how well our computer will transfer data back and forth to another computer.</p>
+                            <p>The internet works by sending packets of data from computer to computer.</p>
+                            <p>Ping measures the time (the latency) for a packet of data to be sent to a host (i.e. website, another computer, or server) and then returned to the sender computer. It also shows whether there was packet loss or errors in the transfer and other useful statistics about the transfer.</p>
+			<button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
                         </div>
                     </div>
                 </div>
@@ -375,24 +516,12 @@
                 <div class="row">
                     <div class="col-lg-8 col-lg-offset-2">
                         <div class="modal-body">
-                            <h2>Project Title</h2>
+                            <h2>Latency</h2>
                             <hr class="star-primary">
-                            <img src="assets/portfolio/circus.png" class="img-responsive img-centered" alt="">
-                            <p>Use this area of the page to describe your project. The icon above is part of a free icon set by <a href="https://sellfy.com/p/8Q9P/jV3VZ/">Flat Icons</a>. On their website, you can download their free set with 16 icons, or you can purchase the entire set with 146 icons for only $12!</p>
-                            <ul class="list-inline item-details">
-                                <li>Client:
-                                    <strong><a href="http://startbootstrap.com">Start Bootstrap</a>
-                                    </strong>
-                                </li>
-                                <li>Date:
-                                    <strong><a href="http://startbootstrap.com">April 2014</a>
-                                    </strong>
-                                </li>
-                                <li>Service:
-                                    <strong><a href="http://startbootstrap.com">Web Development</a>
-                                    </strong>
-                                </li>
-                            </ul>
+                            <img src="assets/portfolio/latency.png" class="img-responsive img-centered" alt="">
+                            <p>Latency is the time for data to be transferred between two computers. While bandwidth describes the maximum speed and throughput the average speed, latency describes whether the transfer was done on the shortest path. It's possible to have slow internet even with high speed bandwidth - data just has to take a long path to the other end. The time helps describe the path.</p>
+                            <p>A useful analogy would be a car traveling on from point A to point B. The car has a maximum speed (bandwidth), travels at an average speed (throughput), and has a path to take to the destination (latency).</p>
+                            <p>Sometimes it's faster to go through a slow-speed short path (streets only) than a high-speed long path (freeway). We monitor the latency to ensure the most optimal path to the destination.</p>
                             <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
                         </div>
                     </div>
@@ -412,25 +541,11 @@
                 <div class="row">
                     <div class="col-lg-8 col-lg-offset-2">
                         <div class="modal-body">
-                            <h2>Project Title</h2>
+                            <h2>Total Data</h2>
                             <hr class="star-primary">
-                            <img src="assets/portfolio/game.png" class="img-responsive img-centered" alt="">
-                            <p>Use this area of the page to describe your project. The icon above is part of a free icon set by <a href="https://sellfy.com/p/8Q9P/jV3VZ/">Flat Icons</a>. On their website, you can download their free set with 16 icons, or you can purchase the entire set with 146 icons for only $12!</p>
-                            <ul class="list-inline item-details">
-                                <li>Client:
-                                    <strong><a href="http://startbootstrap.com">Start Bootstrap</a>
-                                    </strong>
-                                </li>
-                                <li>Date:
-                                    <strong><a href="http://startbootstrap.com">April 2014</a>
-                                    </strong>
-                                </li>
-                                <li>Service:
-                                    <strong><a href="http://startbootstrap.com">Web Development</a>
-                                    </strong>
-                                </li>
-                            </ul>
-                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+                            <img src="assets/portfolio/total.png" class="img-responsive img-centered" alt="">
+                          <p>This is the total amount of data downloaded or uploaded. It is useful to see how much data your computer is using to identify programs that hog internet bandwidth.</p>
+                              <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
                         </div>
                     </div>
                 </div>
@@ -449,25 +564,11 @@
                 <div class="row">
                     <div class="col-lg-8 col-lg-offset-2">
                         <div class="modal-body">
-                            <h2>Project Title</h2>
+                            <h2>GitHub</h2>
                             <hr class="star-primary">
-                            <img src="assets/portfolio/safe.png" class="img-responsive img-centered" alt="">
-                            <p>Use this area of the page to describe your project. The icon above is part of a free icon set by <a href="https://sellfy.com/p/8Q9P/jV3VZ/">Flat Icons</a>. On their website, you can download their free set with 16 icons, or you can purchase the entire set with 146 icons for only $12!</p>
-                            <ul class="list-inline item-details">
-                                <li>Client:
-                                    <strong><a href="http://startbootstrap.com">Start Bootstrap</a>
-                                    </strong>
-                                </li>
-                                <li>Date:
-                                    <strong><a href="http://startbootstrap.com">April 2014</a>
-                                    </strong>
-                                </li>
-                                <li>Service:
-                                    <strong><a href="http://startbootstrap.com">Web Development</a>
-                                    </strong>
-                                </li>
-                            </ul>
-                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+                            <img src="assets/portfolio/git.png" class="img-responsive img-centered" alt="">
+                            <p>Click the image above to be directed to the github repository.</p>
+				<button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
                         </div>
                     </div>
                 </div>
@@ -486,24 +587,14 @@
                 <div class="row">
                     <div class="col-lg-8 col-lg-offset-2">
                         <div class="modal-body">
-                            <h2>Project Title</h2>
+                            <h2>Throughput</h2>
                             <hr class="star-primary">
-                            <img src="assets/portfolio/submarine.png" class="img-responsive img-centered" alt="">
-                            <p>Use this area of the page to describe your project. The icon above is part of a free icon set by <a href="https://sellfy.com/p/8Q9P/jV3VZ/">Flat Icons</a>. On their website, you can download their free set with 16 icons, or you can purchase the entire set with 146 icons for only $12!</p>
-                            <ul class="list-inline item-details">
-                                <li>Client:
-                                    <strong><a href="http://startbootstrap.com">Start Bootstrap</a>
-                                    </strong>
-                                </li>
-                                <li>Date:
-                                    <strong><a href="http://startbootstrap.com">April 2014</a>
-                                    </strong>
-                                </li>
-                                <li>Service:
-                                    <strong><a href="http://startbootstrap.com">Web Development</a>
-                                    </strong>
-                                </li>
-                            </ul>
+                            <h3>Provider Side (A)</h3>
+                            <div id="chart_div_tpa" style="width: auto; height: 500px;"></div>
+                            <h3>Client Side (B)</h3>
+                            <div id="chart_div_tpb" style="width: auto; height: 500px;"></div>
+                            <p>This is the actual current speed of your network. While bandwidth describes a maximum amount in data transferred, throughput describes the an average amount in data transferred. In most cases you won't be seeing throughput reaching your bandwidth cap. This is because data gets corrupted or lost and the data needs to be resent which slows your internet. There are many factors that affect throughput and our system aims to help you identify and eliminate such factors - the end result is faster internet.</p>
+<p>Beware, higher bandwidth may or may not result in higher throughput. So upgrading your bandwidth is not always the solution to faster internet (not to mention expensive). Our systems will help increase throughput to maximize your bandwidth usage to near-optimal levels.</p>
                             <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
                         </div>
                     </div>
@@ -516,7 +607,7 @@
     <script src="assets/jquery.js"></script>
 
     <!-- Bootstrap Core JavaScript -->
-    <script src="assets/bootstrap.min.js"></script>
+    <script src="assets/bootstrap.js"></script>
 
     <!-- Plugin JavaScript -->
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
