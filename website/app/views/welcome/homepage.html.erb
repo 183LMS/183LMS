@@ -60,7 +60,13 @@ sql_tpb =
             AND ((time > NOW() - INTERVAL 6 HOUR)
                 OR (MOD(MINUTE(time), 5) = 0)))
     ORDER BY time desc"
-result_tpb = client.query(sql_tpa, :as => :array)
+result_tpb = client.query(sql_tpb, :as => :array)
+sql_totalBytes =
+"SELECT inB_cumulative, outB_cumulative
+    FROM atable
+    ORDER BY time desc
+    LIMIT 1"
+result_totalBytes = client.query(sql_totalBytes, :as => :array)
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -179,7 +185,7 @@ result_tpb = client.query(sql_tpa, :as => :array)
         data.addColumn('number', 'In Bytes');
         data.addColumn('number', 'Out Bytes');
         data.addRows(
-        <%= "[" %><% result_tpa.to_a.each do |row| %>
+        <%= "[" %><% result_tpb.to_a.each do |row| %>
             <%= "[" + "new Date\(" + row[0].to_s + "\), " + row[1..2].join(", ") + "]," %>
         <% end %><%= "]" %>
         );
@@ -468,7 +474,7 @@ result_tpb = client.query(sql_tpa, :as => :array)
                         <div class="modal-body">
                             <!-- Bandwidth -->
                             <h2>Bandwidth</h2>
-                            <hr class="star-primary"
+                            <hr class="star-primary">
                             <div id="chart_div_bw" style="width: auto; height: 500px;"></div>
                             <p>This is the maximum amount of data that can be transferred from a network at a time. This is a cap on how fast your internet can go and it is often seen in Mbps (Megabytes per second). Your internet service provider (ISP) may give you an estimate on the speeds you Internet may reach up to. Higher bandwidth is usually more expensive.</p>
 <p>Often you won't be seeing speeds totaling your bandwidth cap. If there is a dramatic difference in throughput and bandwidth, your ISP may be limiting bandwidth more than advertised and should be notified.</p>
@@ -544,6 +550,7 @@ result_tpb = client.query(sql_tpa, :as => :array)
                             <h2>Total Data</h2>
                             <hr class="star-primary">
                             <img src="assets/portfolio/total.png" class="img-responsive img-centered" alt="">
+                            <h2>Total: <%= result_totalBytes.to_a[0][0] + result_totalBytes.to_a[0][1] %> Bytes</h2>
                           <p>This is the total amount of data downloaded or uploaded. It is useful to see how much data your computer is using to identify programs that hog internet bandwidth.</p>
                               <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
                         </div>
@@ -566,7 +573,7 @@ result_tpb = client.query(sql_tpa, :as => :array)
                         <div class="modal-body">
                             <h2>GitHub</h2>
                             <hr class="star-primary">
-                            <img src="assets/portfolio/git.png" class="img-responsive img-centered" alt="">
+                            <a href="https://github.com/183LMS/183LMS"><img src="assets/portfolio/git.png" class="img-responsive img-centered" alt=""></a>
                             <p>Click the image above to be directed to the github repository.</p>
 				<button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
                         </div>
