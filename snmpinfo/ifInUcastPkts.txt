@@ -1,6 +1,0 @@
-IF-MIB::ifInUcastPkts.1 = Counter32: 3
-IF-MIB::ifInUcastPkts.2 = Counter32: 9327739
-IF-MIB::ifInUcastPkts.3 = Counter32: 0
-IF-MIB::ifInUcastPkts.4 = Counter32: 555268
-IF-MIB::ifInUcastPkts.5 = Counter32: 0
-IF-MIB::ifInUcastPkts.6 = Counter32: 4960361
