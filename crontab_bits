@@ -1,0 +1,3 @@
+*  *    * * *   root    /183LMS/lms_ping.pl
+*  *    * * *   root    /183LMS/lms_asnmp.pl && /cs183/update_cumulative.py atable
+*  *    * * *   root    /183LMS/lms_bsnmp.pl && /cs183/update_cumulative.py btable
