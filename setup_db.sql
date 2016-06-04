@@ -1,3 +1,7 @@
+CREATE DATABASE IF NOT EXISTS cs183;
+
+USE cs183;
+
 CREATE TABLE `atable` (
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `inB` bigint(20) unsigned DEFAULT NULL,
